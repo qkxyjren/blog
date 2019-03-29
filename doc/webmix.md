@@ -12,8 +12,7 @@
 
 黄色背景为`TextView`，其他为html内容
 
-<img src="https://img-blog.csdnimg.cn/20190328142941333.gif" width="360px"/>
-
+<img src="https://img-blog.csdnimg.cn/20190328142941333.gif" width="300px"/><img src="https://img-blog.csdnimg.cn/20190329113502879.gif" width="300px"/>
 
 ---
 ## html中插入占位元素
@@ -75,3 +74,51 @@ js中的两个方法
 </script>
 
 ```
+当然如果web端不提供js方法供调用也是可以的，那就把js方法也在本地代码里定义并调用.如下:
+```java
+      mWebview.evaluateJavascript("javaScript: function getAdPosition() {\n"
+                            + "        var advertisement = document.getElementById(\"advertisement\");\n"
+                            + "        return advertisement.offsetTop;\n"
+                            + "    };getAdPosition()",
+                        new ValueCallback<String>() {
+                            @Override
+                            public void onReceiveValue(String value) {
+                                Log.i("getAdPosition:", value);
+                                textView.setTranslationY(DensityUtil.dp2px(WebActivity.this, Float.parseFloat(value)));
+                                mWebview.addView(textView);
+                                mWebview.loadUrl("javaScript: function setAdHeight(height) {\n"
+                                    + "        var advertisement = document.getElementById(\"advertisement\");\n"
+                                    + "        advertisement.style.height=height+\"px\";\n"
+                                    + "    };javaScript:setAdHeight("+TV_HEIGHT+");");
+                            }
+                        });
+```
+
+## 线上页面
+以上介绍了本地html的操作方法，那么加载在线页面，或者是第三方的网站还能这样操作吗?
+也是可以的，方法基本一致。
+
+这里以百度首页为例，目的是在搜索框上面插入自己的原生组件，这里找到搜索框的id为`index-form`,获取位置的操作同上，
+出于简单起见这里不再插入元素占位，而是直接更改搜索框的样式，当插入原生组件后修改搜索框的`marginTop`值。
+
+<img src="https://img-blog.csdnimg.cn/20190329114425926.jpg" />
+
+```java
+      mWebView.evaluateJavascript("javaScript: function getAdPosition() {\n"
+                              + "        var advertisement = document.getElementById(\"index-form\");\n"
+                              + "        return advertisement.offsetTop;\n"
+                              + "    };getAdPosition()",
+                          new ValueCallback<String>() {
+                              @Override
+                              public void onReceiveValue(String value) {
+                                  Log.e("getAdPosition:", value);
+                                  textView.setTranslationY(DensityUtil.dp2px(WebActivity.this, Float.parseFloat(value)));
+                                  mWebView.addView(textView);
+                                  mWebView.loadUrl("javaScript: function setAdHeight(height) {\n"
+                                      + "        var advertisement = document.getElementById(\"index-form\");\n"
+                                      + "        advertisement.style.marginTop=height+\"px\";\n"
+                                      + "    }; setAdHeight("+(TV_HEIGHT+16)+");");
+                              }
+                          });
+```
+[获取源码:https://github.com/qkxyjren/blog/tree/master/webmix](https://github.com/qkxyjren/blog/tree/master/webmix)

@@ -6,6 +6,8 @@
 <WebView
   android:layout_width="match_parent"
   android:id="@+id/webview"
+  android:visibility="visible"
   android:layout_height="match_parent">
 </WebView>
+
 </LinearLayout>
